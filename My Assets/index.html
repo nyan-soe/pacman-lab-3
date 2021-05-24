@@ -21,9 +21,12 @@
         position:absolute;
         visibility:hidden
       }
+
       h1 { font-family: BDCartoonShoutRegular; text-align:center; }
       body { width:342px; margin:0px auto; font-family:sans-serif; }
       a { text-decoration:none; }
+
+
     </style>
 
 </head>
@@ -37,6 +40,16 @@
   <a href="http://arandomurl.com/">Writeup</a> |
   Code on <a href="http://arandomurl.com/">Github</a>
 
+  <canvas id="myMenu" width="200" height="200" style="position: absolute;top:150px; left:10%;
+        border-radius: 25px;
+        border: 2px solid #73AD21;
+        padding: 20px;">
+  </canvas>
+  <canvas id="myScreen" width="250" height="200" style="position: absolute;top:150px; right:5%;
+        border-radius: 25px;
+        border: 2px solid #73AD21;
+        padding: 20px;">
+  </canvas>
   <div id="pacman"></div>
   <script src="pacman.js"></script>
   <script src="modernizr-1.5.min.js"></script>

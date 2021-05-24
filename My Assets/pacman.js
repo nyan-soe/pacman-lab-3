@@ -835,6 +835,55 @@ var PACMAN = (function () {
 		ctx.fillText(text, x, map.height * 10 + 8);
     }
 
+    function displayMenu() {
+        // Display Menu
+        var c = document.getElementById("myMenu");
+        var ctx = c.getContext("2d");
+
+        ctx.font = "15px Arial";
+        ctx.fillText("H - Help/Tutorial", 10, 20);
+        ctx.fillText("N - New Game", 10, 70);
+        ctx.fillText("P - Pause Game", 10, 120);
+        ctx.fillText("C - Credits", 10, 170);
+    }
+
+    function displayHelp() {
+        // Display Help
+        var c = document.getElementById("myScreen");
+        var ctx = c.getContext("2d");
+        ctx.canvas.hidden = false;
+
+        ctx.clearRect(0,0, c.width, c.height);
+
+        ctx.font = "11px Arial";
+        ctx.fillText("Use up, down, left, right arrow to Guide Pacman ", 5, 20);
+        ctx.fillText("around the maze, and eat all the biscuits/white", 5, 40);
+        ctx.fillText("dots. If you eat a power pill, you can eat ghosts.", 5, 60);
+        ctx.fillText("Press Q to remove this information box.", 5, 180);
+    }
+
+    function displayCredits() {
+        var c = document.getElementById("myScreen");
+        var ctx = c.getContext("2d");
+        ctx.canvas.hidden = false;
+
+        ctx.clearRect(0,0, c.width, c.height);
+
+        ctx.font = "11px Arial";
+        ctx.fillText("This Pacman game is modified by ", 5, 20);
+        ctx.fillText("Alinia Mabatid", 5, 40);
+        ctx.fillText("Alen Khasanov", 5, 60);
+        ctx.fillText("Nyan Soe", 5, 80);
+        ctx.fillText("Press Q to remove this information box.", 5, 180);
+    }
+
+    function hideMyScreen() {
+        var c = document.getElementById("myScreen");
+        var ctx = c.getContext("2d");
+        ctx.canvas.hidden = true;
+    }
+
+
     function soundDisabled() {
         return localStorage['soundDisabled'] === 'true';
     }
@@ -872,7 +921,13 @@ var PACMAN = (function () {
     function keyDown(e) {
         if (e.keyCode === KEY.N) {
 			startNewGame();
-		} else if (e.keyCode === KEY.S) {
+		} else if (e.keyCode === KEY.H) {
+            displayHelp();
+        }else if (e.keyCode === KEY.Q) {
+            hideMyScreen();
+        }else if (e.keyCode === KEY.C) {
+            displayCredits();
+        }else if (e.keyCode === KEY.S) {
 			audio.disableSound();
 			localStorage['soundDisabled'] = !soundDisabled();
 		} else if (e.keyCode === KEY.P && state === PAUSE) {
@@ -1100,6 +1155,8 @@ var PACMAN = (function () {
 
 		map.draw(ctx);
 		dialog('Loading ...');
+        displayMenu();
+        hideMyScreen();
 
 		var extension = Modernizr.audio.ogg ? 'ogg' : 'mp3';
 
@@ -1115,6 +1172,7 @@ var PACMAN = (function () {
 		load(audio_files, function () {
 			loaded();
 		});
+
     }
 
     function load(arr, callback) { 

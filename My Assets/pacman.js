@@ -11,6 +11,7 @@ let NONE = 4,
     DYING = 10,
     Pacman = {};
 
+defeatFlag = false;
 Pacman.FPS = 15;
 Pacman.Level = 0;
 Pacman.Ghost = function (game, map, colour, position) {
@@ -509,6 +510,8 @@ Pacman.User = function (game, map) {
 		ctx.fill();    
     }
 
+
+
     function draw(ctx) { 
         let s = map.blockSize;
 		let	angle = calcAngle(direction, position);
@@ -845,6 +848,23 @@ var PACMAN = (function () {
 		ctx.fillText(text, x, map.height * 10 + 8);
     }
 
+    function loseScene(text) {
+        let width = ctx.measureText(text).width;
+        let x = (map.width * map.blockSize - width) / 2;
+
+        ctx.beginPath();
+        ctx.fillStyle = '#000';
+        ctx.arc(x + 50, map.height * 10 + 8 , 400, 0, 2 * Math.PI);
+        ctx.stroke();
+
+        ctx.fill();
+        ctx.closePath();
+
+        ctx.fillStyle = '#FFFF00';
+        ctx.font = '20px BDCartoonShoutRegular';
+        ctx.fillText(text, x, map.height * 10 + 8);
+    }
+
     function displayMenu() {
         // Display Menu
         var c = document.getElementById("myMenu");
@@ -967,8 +987,12 @@ var PACMAN = (function () {
 		user.loseLife();
 
 		if (user.getLives() > 0) {
-			startLevel();
-		}
+            startLevel();
+        } else {
+		    // set the flag if no live left
+            defeatFlag = true;
+        }
+
     }
 
     function setState(nState) { 
@@ -1077,7 +1101,13 @@ var PACMAN = (function () {
 		} else if (state === WAITING && stateChanged) {
 			stateChanged = false;
 			map.draw(ctx);
-			dialog('Press N to start a New game');
+			if (defeatFlag == true) {
+                loseScene('You lose');
+			    defeatFlag = false;
+            } else {
+                dialog('Press N to start a New game');
+            }
+
 		} else if (state === EATEN_PAUSE && tick - timerStart > Pacman.FPS / 3) {
 			map.draw(ctx);
 			setState(PLAYING);

@@ -852,9 +852,10 @@ var PACMAN = (function () {
 
         ctx.font = "15px Arial";
         ctx.fillText("H - Help/Tutorial", 10, 20);
-        ctx.fillText("N - New Game", 10, 70);
-        ctx.fillText("P - Pause Game", 10, 120);
-        ctx.fillText("C - Credits", 10, 170);
+        ctx.fillText("N - New Game", 10, 60);
+        ctx.fillText("P - Pause Game", 10, 100);
+        ctx.fillText("S - Silent Mode", 10, 140);
+        ctx.fillText("C - Credits", 10, 180);
     }
 
     function displayHelp() {

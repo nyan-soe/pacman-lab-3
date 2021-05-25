@@ -866,10 +866,12 @@ var PACMAN = (function () {
 
         ctx.clearRect(0,0, c.width, c.height);
 
-        ctx.font = "11px Arial";
-        ctx.fillText("Use up, down, left, right arrow to Guide Pacman ", 5, 20);
-        ctx.fillText("around the maze, and eat all the biscuits/white", 5, 40);
-        ctx.fillText("dots. If you eat a power pill, you can eat ghosts.", 5, 60);
+        ctx.font = "14px Arial";
+        ctx.fillText("Use up, down, left, right arrow to Guide", 5, 20);
+        ctx.fillText("Pacman  around the maze, and eat all", 5, 40);
+        ctx.fillText("the biscuits/white dots. If you eat a red", 5, 60);
+        ctx.fillText("pill, you can eat ghosts before expiring", 5, 80);
+        ctx.fillText("of the effect.", 5, 100);
         ctx.fillText("Press Q to remove this information box.", 5, 180);
     }
 
@@ -880,12 +882,15 @@ var PACMAN = (function () {
 
         ctx.clearRect(0,0, c.width, c.height);
 
-        ctx.font = "11px Arial";
-        ctx.fillText("This Pacman game is modified by ", 5, 20);
-        ctx.fillText("Alinia Mabatid", 5, 40);
-        ctx.fillText("Alen Khasanov", 5, 60);
-        ctx.fillText("Nyan Soe", 5, 80);
+        ctx.font = "14px Arial";
+        ctx.fillText("We would like to express our gratitude", 5, 20);
+        ctx.fillText("to the original developer(s).", 5, 40);
+        ctx.fillText("This Pacman game is modified by:", 5, 80);
+        ctx.fillText("- Alinia Mabatid", 5, 100);
+        ctx.fillText("- Alen Khasanov", 5, 120);
+        ctx.fillText("- Nyan Soe", 5, 140);
         ctx.fillText("Press Q to remove this information box.", 5, 180);
+
     }
 
     function hideMyScreen() {

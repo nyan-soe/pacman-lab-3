@@ -54,18 +54,16 @@ Pacman.Ghost = function (game, map, colour, position) {
         return eatable === null && eaten !== null;
     }
     
-    function getRandomDirection(pacmanPos, atr) {
+    function getDirection(pacmanPos, atr) {
         let moves = (direction === LEFT || direction === RIGHT)
             ? [UP, DOWN] : [LEFT, RIGHT];
 
         if (atr === 0 && pacmanPos !== null && position !== null) {
             if (direction === LEFT || direction === RIGHT) {
-                if (position.y > pacmanPos.y) {
+                if (position.y > pacmanPos.y)
                     return UP;
-                }
-                else if (position.y < pacmanPos.y) {
+                else if (position.y < pacmanPos.y) 
                     return DOWN;
-                }
             }
             else if (position.x > pacmanPos.x) 
                 return LEFT;
@@ -82,8 +80,8 @@ Pacman.Ghost = function (game, map, colour, position) {
 
         position = initialPos;
 
-        direction = getRandomDirection(pacmanPos, 0);
-        due = getRandomDirection(pacmanPos, 0);
+        direction = getDirection(pacmanPos, 0);
+        due = getDirection(pacmanPos, 0);
     }
     
     function onWholeSquare(x) {
@@ -236,7 +234,7 @@ Pacman.Ghost = function (game, map, colour, position) {
                 x: pointToCoord(nextSquare(npos.x, direction))
             })) {
             
-            due = getRandomDirection(pacmanPos, 1);            
+            due = getDirection(pacmanPos, 1);            
             return move(ctx, pacmanPos);
         }
 
@@ -248,7 +246,7 @@ Pacman.Ghost = function (game, map, colour, position) {
             position = tmp;
         }
         
-        due = getRandomDirection(pacmanPos, 0);
+        due = getDirection(pacmanPos, 0);
 
         return {
 			new: position,
@@ -550,7 +548,6 @@ Pacman.Map = function (size) {
 		width = null,
 		blockSize = size,
 		pillSize = 0,
-		oilSize = 0,
 		map = null;
     
     function withinBounds(y, x) {
@@ -568,7 +565,7 @@ Pacman.Map = function (size) {
 
 		let peice = map[pos.y][pos.x];
 
-		return peice === Pacman.EMPTY || peice === Pacman.BISCUIT || peice === Pacman.PILL || peice === Pacman.OIL;
+		return peice === Pacman.EMPTY || peice === Pacman.BISCUIT || peice === Pacman.PILL;
 	}
 
 	function drawWall(ctx) {
@@ -667,10 +664,6 @@ Pacman.Map = function (size) {
 			return;
 		}
 
-		if (layout === Pacman.OIL) {
-			return;
-		}
-
 		ctx.beginPath();
 
 		if (layout === Pacman.EMPTY || layout === Pacman.BLOCK || layout === Pacman.BISCUIT) {
@@ -708,7 +701,7 @@ Pacman.Map = function (size) {
 };
 
 Pacman.Audio = function(game) {
-    var files = [],
+    let files = [],
 		endEvents = [],
 		progressEvents = [],
 		playing = [];
@@ -793,7 +786,7 @@ Pacman.Audio = function(game) {
 	};
 };
 
-var PACMAN = (function () {
+let PACMAN = (function () {
     let state = WAITING,
 		audio = null,
 		ghosts = [],
@@ -837,8 +830,8 @@ var PACMAN = (function () {
 
     function displayMenu() {
         // Display Menu
-        var c = document.getElementById("myMenu");
-        var ctx = c.getContext("2d");
+        let c = document.getElementById("myMenu");
+        let ctx = c.getContext("2d");
 
         ctx.font = "15px Arial";
         ctx.fillText("H - Help/Tutorial", 10, 20);
@@ -849,8 +842,8 @@ var PACMAN = (function () {
 
     function displayHelp() {
         // Display Help
-        var c = document.getElementById("myScreen");
-        var ctx = c.getContext("2d");
+        let c = document.getElementById("myScreen");
+        let ctx = c.getContext("2d");
         ctx.canvas.hidden = false;
 
         ctx.clearRect(0,0, c.width, c.height);
@@ -863,8 +856,8 @@ var PACMAN = (function () {
     }
 
     function displayCredits() {
-        var c = document.getElementById("myScreen");
-        var ctx = c.getContext("2d");
+        let c = document.getElementById("myScreen");
+        let ctx = c.getContext("2d");
         ctx.canvas.hidden = false;
 
         ctx.clearRect(0,0, c.width, c.height);
@@ -878,8 +871,8 @@ var PACMAN = (function () {
     }
 
     function hideMyScreen() {
-        var c = document.getElementById("myScreen");
-        var ctx = c.getContext("2d");
+        let c = document.getElementById("myScreen");
+        let ctx = c.getContext("2d");
         ctx.canvas.hidden = true;
     }
 
@@ -972,7 +965,7 @@ var PACMAN = (function () {
 		ctx.fillRect(0, topLeft, map.width * map.blockSize, 30);
 		ctx.fillStyle = '#FFFF00';
 
-		for (var i = 0, len = user.getLives(); i < len; i++) {
+		for (let i = 0, len = user.getLives(); i < len; i++) {
 			ctx.fillStyle = '#FFFF00';
 			ctx.beginPath();
 			ctx.moveTo(150 + 25 * i + map.blockSize / 2, topLeft + 1 + map.blockSize / 2);
@@ -1158,9 +1151,9 @@ var PACMAN = (function () {
         displayMenu();
         hideMyScreen();
 
-		var extension = Modernizr.audio.ogg ? 'ogg' : 'mp3';
+		let extension = Modernizr.audio.ogg ? 'ogg' : 'mp3';
 
-		var audio_files = [
+		let audio_files = [
 			['start', root + 'audio/opening_song.' + extension],
 			['die', root + 'audio/die.' + extension],
 			['eatghost', root + 'audio/eatghost.' + extension],
@@ -1201,8 +1194,7 @@ var PACMAN = (function () {
     
 }());
 
-/* Human readable keyCode index */
-var KEY = {
+let KEY = {
 	BACKSPACE: 8,
 	TAB: 9,
 	NUM_PAD_CLEAR: 12,
@@ -1251,7 +1243,7 @@ var KEY = {
 
 (function () {
 	/* 0 - 9 */
-	for (var i = 48; i <= 57; i++) {
+	for (let i = 48; i <= 57; i++) {
 		KEY['' + (i - 48)] = i;
 	}
 	/* A - Z */
@@ -1273,7 +1265,6 @@ Pacman.BISCUIT = 1;
 Pacman.EMPTY = 2;
 Pacman.BLOCK = 3;
 Pacman.PILL = 4;
-Pacman.OIL = 5;
 
 Pacman.MAP = [
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -1411,6 +1402,7 @@ Object.prototype.clone = function () {
 		if (i === 'clone') {
 			continue;
 		}
+
 		if (this[i] && typeof this[i] === 'object') {
 			newObj[i] = this[i].clone();
 		} else {

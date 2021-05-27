@@ -940,9 +940,9 @@ let PACMAN = (function () {
 		setState(COUNTDOWN);
     }    
 
-    function startNewGame() {
+    function startNewGame(level) {
         setState(WAITING);
-		Pacman.Level = 1;
+		Pacman.Level = level;
 		user.reset();
 		map.reset();
 		map.draw(ctx);
@@ -951,7 +951,7 @@ let PACMAN = (function () {
 
     function keyDown(e) {
         if (e.keyCode === KEY.N) {
-			startNewGame();
+			startNewGame(1);
 		} else if (e.keyCode === KEY.H) {
 			displayHelp();
 		} else if (e.keyCode === KEY.Q) {
@@ -959,8 +959,10 @@ let PACMAN = (function () {
 		} else if (e.keyCode === KEY.C) {
 			displayCredits();
 		} else if (e.keyCode === KEY.D) {
-			if (Pacman.Level < 3)
+			if (Pacman.Level < 3) {
                 Pacman.Level++;
+                startNewGame(Pacman.Level);
+            }
 		} else if (e.keyCode === KEY.S) {
 			audio.disableSound();
 			localStorage['soundDisabled'] = !soundDisabled();

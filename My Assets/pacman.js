@@ -441,7 +441,6 @@ Pacman.User = function (game, map) {
 			}
 		}
 
-        //console.log(position);
         currentPos = position;
 
 		return {
@@ -863,59 +862,58 @@ let PACMAN = (function () {
     }
 
     function displayMenu() {
-        // Display Menu
-        let c = document.getElementById("myMenu");
-        let ctx = c.getContext("2d");
+		// Display Menu
+		let c = document.getElementById('myMenu');
+		let ctx = c.getContext('2d');
 
-        ctx.font = "15px Arial";
-        ctx.fillText("H - Help/Tutorial", 10, 20);
-        ctx.fillText("N - New Game", 10, 60);
-        ctx.fillText("P - Pause Game", 10, 100);
-        ctx.fillText("S - Silent Mode", 10, 140);
-        ctx.fillText("C - Credits", 10, 180);
-    }
+		ctx.font = '15px Arial';
+		ctx.fillText('H - Help/Tutorial', 10, 20);
+		ctx.fillText('N - New Game', 10, 60);
+		ctx.fillText('P - Pause Game', 10, 100);
+		ctx.fillText('S - Silent Mode', 10, 140);
+		ctx.fillText('C - Credits', 10, 180);
+	}
 
     function displayHelp() {
-        // Display Help
-        let c = document.getElementById("myScreen");
-        let ctx = c.getContext("2d");
-        ctx.canvas.hidden = false;
+		// Display Help
+		let c = document.getElementById('myScreen');
+		let ctx = c.getContext('2d');
+		ctx.canvas.hidden = false;
 
-        ctx.clearRect(0,0, c.width, c.height);
+		ctx.clearRect(0, 0, c.width, c.height);
 
-        ctx.font = "14px Arial";
-        ctx.fillText("Use up, down, left, right arrow to Guide", 5, 20);
-        ctx.fillText("Pacman  around the maze, and eat all", 5, 40);
-        ctx.fillText("the biscuits/white dots. If you eat a red", 5, 60);
-        ctx.fillText("pill, you can eat ghosts before expiring", 5, 80);
-        ctx.fillText("of the effect.", 5, 100);
-        ctx.fillText("Press Q to remove this information box.", 5, 180);
-    }
+		ctx.font = '14px Arial';
+		ctx.fillText('Use up, down, left, right arrow to Guide', 5, 20);
+		ctx.fillText('Pacman  around the maze, and eat all', 5, 40);
+		ctx.fillText('the biscuits/white dots. If you eat a red', 5, 60);
+		ctx.fillText('pill, you can eat ghosts before expiring', 5, 80);
+		ctx.fillText('of the effect.', 5, 100);
+		ctx.fillText('Press Q to remove this information box.', 5, 180);
+	}
 
     function displayCredits() {
-        let c = document.getElementById("myScreen");
-        let ctx = c.getContext("2d");
-        ctx.canvas.hidden = false;
+        let c = document.getElementById('myScreen');
+		let ctx = c.getContext('2d');
+		ctx.canvas.hidden = false;
 
-        ctx.clearRect(0,0, c.width, c.height);
+		ctx.clearRect(0, 0, c.width, c.height);
 
-        ctx.font = "14px Arial";
-        ctx.fillText("We would like to express our gratitude", 5, 20);
-        ctx.fillText("to the original developer(s).", 5, 40);
-        ctx.fillText("This Pacman game is modified by:", 5, 80);
-        ctx.fillText("- Alinia Mabatid", 5, 100);
-        ctx.fillText("- Alen Khasanov", 5, 120);
-        ctx.fillText("- Nyan Soe", 5, 140);
-        ctx.fillText("Press Q to remove this information box.", 5, 180);
+		ctx.font = '14px Arial';
+		ctx.fillText('We would like to express our gratitude', 5, 20);
+		ctx.fillText('to the original developer(s).', 5, 40);
+		ctx.fillText('This Pacman game is modified by:', 5, 80);
+		ctx.fillText('- Alinia Mabatid', 5, 100);
+		ctx.fillText('- Alen Khasanov', 5, 120);
+		ctx.fillText('- Nyan Soe', 5, 140);
+		ctx.fillText('Press Q to remove this information box.', 5, 180);
 
     }
 
     function hideMyScreen() {
-        let c = document.getElementById("myScreen");
-        let ctx = c.getContext("2d");
-        ctx.canvas.hidden = true;
+        let c = document.getElementById('myScreen');
+		let ctx = c.getContext('2d');
+		ctx.canvas.hidden = true;
     }
-
 
     function soundDisabled() {
         return localStorage['soundDisabled'] === 'true';
@@ -955,12 +953,15 @@ let PACMAN = (function () {
         if (e.keyCode === KEY.N) {
 			startNewGame();
 		} else if (e.keyCode === KEY.H) {
-            displayHelp();
-        }else if (e.keyCode === KEY.Q) {
-            hideMyScreen();
-        }else if (e.keyCode === KEY.C) {
-            displayCredits();
-        }else if (e.keyCode === KEY.S) {
+			displayHelp();
+		} else if (e.keyCode === KEY.Q) {
+			hideMyScreen();
+		} else if (e.keyCode === KEY.C) {
+			displayCredits();
+		} else if (e.keyCode === KEY.D) {
+			if (Pacman.Level < 3)
+                Pacman.Level++;
+		} else if (e.keyCode === KEY.S) {
 			audio.disableSound();
 			localStorage['soundDisabled'] = !soundDisabled();
 		} else if (e.keyCode === KEY.P && state === PAUSE) {
@@ -976,6 +977,7 @@ let PACMAN = (function () {
 		} else if (state !== PAUSE) {
 			return user.keyDown(e);
 		}
+
 		return true;
     }    
 
@@ -989,7 +991,6 @@ let PACMAN = (function () {
 		    // set the flag if no live left
             defeatFlag = true;
         }
-
     }
 
     function setState(nState) { 
@@ -1098,7 +1099,7 @@ let PACMAN = (function () {
 		} else if (state === WAITING && stateChanged) {
 			stateChanged = false;
 			map.draw(ctx);
-			if (defeatFlag == true) {
+			if (defeatFlag) {
                 loseScene('You lose');
 			    defeatFlag = false;
             } else {
@@ -1162,11 +1163,10 @@ let PACMAN = (function () {
     }
     
     function init(wrapper, root) {
-        let i,
-			len,
-			ghost,
-			blockSize = wrapper.offsetWidth / 19,
-			canvas = document.createElement('canvas');
+        let i, len, ghost;
+
+		let blockSize = wrapper.offsetWidth / 19;
+		let canvas = document.createElement('canvas');
 
 		canvas.setAttribute('width', blockSize * 19 + 'px');
 		canvas.setAttribute('height', blockSize * 22 + 30 + 'px');
@@ -1215,7 +1215,6 @@ let PACMAN = (function () {
 		load(audio_files, function () {
 			loaded();
 		});
-
     }
 
     function load(arr, callback) { 

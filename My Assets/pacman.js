@@ -11,7 +11,9 @@ let NONE = 4,
     DYING = 10,
     Pacman = {};
 
+defeatFlag = false;
 Pacman.FPS = 15;
+Pacman.Level = 0;
 Pacman.Ghost = function (game, map, colour, position) {
     let direction = null,
 		eatable = null,
@@ -506,6 +508,8 @@ Pacman.User = function (game, map) {
 		ctx.fill();    
     }
 
+
+
     function draw(ctx) { 
         let s = map.blockSize;
 		let	angle = calcAngle(direction, position);
@@ -575,9 +579,17 @@ Pacman.Map = function (size) {
 		ctx.lineWidth = 5;
 		ctx.lineCap = 'round';
 
-		for (i = 0; i < Pacman.WALLS.length; i += 1) {
-			line = Pacman.WALLS[i];
-			ctx.beginPath();
+		if (Pacman.Level <= 1) {
+            walls = Pacman.WALLS1
+        } else if (Pacman.Level == 2) {
+            walls = Pacman.WALLS2;
+        } else {
+            walls = Pacman.WALLS3;
+        }
+
+        for (i = 0; i < walls.length; i += 1) {
+            line = walls[i];
+            ctx.beginPath();
 
 			for (j = 0; j < line.length; j += 1) {
 				p = line[j];
@@ -600,7 +612,13 @@ Pacman.Map = function (size) {
 	}
     
     function reset() {       
-        map = Pacman.MAP.clone();
+		if (Pacman.Level <= 1){
+            map = Pacman.MAP1.clone();
+        }else if (Pacman.Level == 2) {
+            map = Pacman.MAP2.clone();
+        } else {
+            map = Pacman.MAP3.clone();
+        }
 		height = map.length;
 		width = map[0].length;        
     }
@@ -792,7 +810,6 @@ let PACMAN = (function () {
 		ghosts = [],
 		ghostSpecs = ['#00FFDE', '#FF0000', '#FFB8DE'],
 		eatenCount = 0,
-		level = 0,
 		tick = 0,
 		ghostPos,
 		userPos,
@@ -828,6 +845,23 @@ let PACMAN = (function () {
 		ctx.fillText(text, x, map.height * 10 + 8);
     }
 
+    function loseScene(text) {
+        let width = ctx.measureText(text).width;
+        let x = (map.width * map.blockSize - width) / 2;
+
+        ctx.beginPath();
+        ctx.fillStyle = '#000';
+        ctx.arc(x + 50, map.height * 10 + 8 , 400, 0, 2 * Math.PI);
+        ctx.stroke();
+
+        ctx.fill();
+        ctx.closePath();
+
+        ctx.fillStyle = '#FFFF00';
+        ctx.font = '20px BDCartoonShoutRegular';
+        ctx.fillText(text, x, map.height * 10 + 8);
+    }
+
     function displayMenu() {
         // Display Menu
         let c = document.getElementById("myMenu");
@@ -835,9 +869,10 @@ let PACMAN = (function () {
 
         ctx.font = "15px Arial";
         ctx.fillText("H - Help/Tutorial", 10, 20);
-        ctx.fillText("N - New Game", 10, 70);
-        ctx.fillText("P - Pause Game", 10, 120);
-        ctx.fillText("C - Credits", 10, 170);
+        ctx.fillText("N - New Game", 10, 60);
+        ctx.fillText("P - Pause Game", 10, 100);
+        ctx.fillText("S - Silent Mode", 10, 140);
+        ctx.fillText("C - Credits", 10, 180);
     }
 
     function displayHelp() {
@@ -848,10 +883,12 @@ let PACMAN = (function () {
 
         ctx.clearRect(0,0, c.width, c.height);
 
-        ctx.font = "11px Arial";
-        ctx.fillText("Use up, down, left, right arrow to Guide Pacman ", 5, 20);
-        ctx.fillText("around the maze, and eat all the biscuits/white", 5, 40);
-        ctx.fillText("dots. If you eat a power pill, you can eat ghosts.", 5, 60);
+        ctx.font = "14px Arial";
+        ctx.fillText("Use up, down, left, right arrow to Guide", 5, 20);
+        ctx.fillText("Pacman  around the maze, and eat all", 5, 40);
+        ctx.fillText("the biscuits/white dots. If you eat a red", 5, 60);
+        ctx.fillText("pill, you can eat ghosts before expiring", 5, 80);
+        ctx.fillText("of the effect.", 5, 100);
         ctx.fillText("Press Q to remove this information box.", 5, 180);
     }
 
@@ -862,12 +899,15 @@ let PACMAN = (function () {
 
         ctx.clearRect(0,0, c.width, c.height);
 
-        ctx.font = "11px Arial";
-        ctx.fillText("This Pacman game is modified by ", 5, 20);
-        ctx.fillText("Alinia Mabatid", 5, 40);
-        ctx.fillText("Alen Khasanov", 5, 60);
-        ctx.fillText("Nyan Soe", 5, 80);
+        ctx.font = "14px Arial";
+        ctx.fillText("We would like to express our gratitude", 5, 20);
+        ctx.fillText("to the original developer(s).", 5, 40);
+        ctx.fillText("This Pacman game is modified by:", 5, 80);
+        ctx.fillText("- Alinia Mabatid", 5, 100);
+        ctx.fillText("- Alen Khasanov", 5, 120);
+        ctx.fillText("- Nyan Soe", 5, 140);
         ctx.fillText("Press Q to remove this information box.", 5, 180);
+
     }
 
     function hideMyScreen() {
@@ -904,7 +944,7 @@ let PACMAN = (function () {
 
     function startNewGame() {
         setState(WAITING);
-		level = 1;
+		Pacman.Level = 1;
 		user.reset();
 		map.reset();
 		map.draw(ctx);
@@ -944,8 +984,12 @@ let PACMAN = (function () {
 		user.loseLife();
 
 		if (user.getLives() > 0) {
-			startLevel();
-		}
+            startLevel();
+        } else {
+		    // set the flag if no live left
+            defeatFlag = true;
+        }
+
     }
 
     function setState(nState) { 
@@ -988,7 +1032,7 @@ let PACMAN = (function () {
 		ctx.fillStyle = '#FFFF00';
 		ctx.font = '14px BDCartoonShoutRegular';
 		ctx.fillText('Score: ' + user.theScore(), 30, textBase);
-		ctx.fillText('Level: ' + level, 260, textBase);
+		ctx.fillText('Level: ' + Pacman.Level, 260, textBase);
     }
 
     function redrawBlock(pos) {
@@ -1054,7 +1098,13 @@ let PACMAN = (function () {
 		} else if (state === WAITING && stateChanged) {
 			stateChanged = false;
 			map.draw(ctx);
-			dialog('Press N to start a New game');
+			if (defeatFlag == true) {
+                loseScene('You lose');
+			    defeatFlag = false;
+            } else {
+                dialog('Press N to start a New game');
+            }
+
 		} else if (state === EATEN_PAUSE && tick - timerStart > Pacman.FPS / 3) {
 			map.draw(ctx);
 			setState(PLAYING);
@@ -1098,7 +1148,7 @@ let PACMAN = (function () {
 
     function completedLevel() {
         setState(WAITING);
-        level += 1;
+		Pacman.Level += 1;
         map.reset();
         user.newLevel();
         startLevel();
@@ -1266,7 +1316,57 @@ Pacman.EMPTY = 2;
 Pacman.BLOCK = 3;
 Pacman.PILL = 4;
 
-Pacman.MAP = [
+Pacman.MAP1 = [
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 4, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 4, 0],
+	[0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0],
+	[0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0],
+	[0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 1, 0, 1, 0],
+	[0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0],
+	[0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 4, 1, 1, 1, 1, 1, 1, 1, 0],
+	[0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
+	[2, 2, 2, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 2, 2, 2],
+	[0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0],
+	[2, 2, 2, 2, 1, 0, 1, 0, 3, 3, 3, 0, 1, 1, 1, 2, 2, 2, 2],
+	[0, 0, 0, 0, 1, 0, 1, 0, 0, 3, 0, 0, 1, 0, 1, 0, 0, 0, 0],
+	[2, 2, 2, 0, 1, 1, 1, 1, 1, 2, 1, 1, 1, 0, 1, 0, 2, 2, 2],
+	[0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0],
+	[0, 1, 1, 1, 1, 0, 2, 0, 1, 0, 4, 1, 1, 1, 1, 1, 1, 1, 0],
+	[0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0],
+	[0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0],
+	[0, 0, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0],
+	[0, 1, 1, 4, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 4, 1, 1, 0],
+	[0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0],
+	[0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+];
+
+Pacman.MAP2 = [
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+	[0, 1, 0, 4, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 4, 0, 1, 0],
+	[0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0],
+	[0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0],
+	[0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0],
+	[0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 1, 0, 0, 1, 1, 1, 1, 1, 0],
+	[0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0],
+	[2, 2, 2, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 2, 2, 2],
+	[0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0],
+	[2, 2, 2, 2, 1, 0, 1, 0, 3, 3, 3, 0, 1, 0, 1, 2, 2, 2, 2],
+	[0, 0, 0, 0, 1, 0, 1, 0, 0, 3, 0, 0, 1, 0, 1, 0, 0, 0, 0],
+	[2, 2, 2, 0, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 0, 2, 2, 2],
+	[0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0],
+	[0, 1, 1, 1, 1, 0, 2, 0, 1, 0, 1, 0, 2, 0, 1, 1, 1, 1, 0],
+	[0, 4, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 4, 0],
+	[0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+	[0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0],
+	[0, 1, 1, 1, 0, 1, 0, 1, 1, 4, 1, 1, 0, 1, 0, 1, 1, 1, 0],
+	[0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0],
+	[0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+];
+
+Pacman.MAP3 = [
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 	[0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
 	[0, 4, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 4, 0],
@@ -1281,7 +1381,7 @@ Pacman.MAP = [
 	[0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0],
 	[2, 2, 2, 0, 1, 0, 1, 1, 1, 2, 1, 1, 1, 0, 1, 0, 2, 2, 2],
 	[0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0],
-	[0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+	[0, 4, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
 	[0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0],
 	[0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 4, 0],
 	[0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0],
@@ -1291,7 +1391,222 @@ Pacman.MAP = [
 	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 ];
 
-Pacman.WALLS = [
+Pacman.WALLS1 = [
+    
+    [{"move": [0, 9.5]}, {"line": [3, 9.5]},
+     {"curve": [3.5, 9.5, 3.5, 9]}, {"line": [3.5, 8]},
+     {"curve": [3.5, 7.5, 3, 7.5]}, {"line": [1, 7.5]},
+     {"curve": [0.5, 7.5, 0.5, 7]}, {"line": [0.5, 1]},
+     {"curve": [0.5, 0.5, 1, 0.5]}, {"line": [9, 0.5]},
+     {"curve": [9.5, 0.5, 9.5, 1]}, {"line": [9.5, 3.5]}],
+
+    [{"move": [9.5, 1]},
+     {"curve": [9.5, 0.5, 10, 0.5]}, {"line": [18, 0.5]},
+     {"curve": [18.5, 0.5, 18.5, 1]}, {"line": [18.5, 7]},
+     {"curve": [18.5, 7.5, 18, 7.5]}, {"line": [16, 7.5]},
+     {"curve": [15.5, 7.5, 15.5, 8]}, {"line": [15.5, 9]},
+     {"curve": [15.5, 9.5, 16, 9.5]}, {"line": [19, 9.5]}],
+
+    [{"move": [16.5, 5.5]}, {"line": [16.5, 4.5]}],
+
+    [{"move": [2.5, 2.5]}, {"line": [2.5, 5]},
+     {"move": [2.5, 5]}, {"curve": [2.5, 5.5, 3, 5.5]},
+     {"move": [3, 5.5]}, {"line": [9, 5.5]}, {"curve": [9.5, 5.5, 9.5, 6]},
+     {"line": [9.5, 7]}, {"move": [13, 7.5]}, {"line": [10, 7.5]}, {"move": [10, 7.5]}, {"curve": [9.4, 7.5, 9.5, 6.5]},
+     {"move": [13, 7.5]}, {"curve": [13.5, 7.5, 13.5, 8]},
+     {"line": [13.5, 9.5]}],
+
+    [{"move": [4.5, 2.5]}, {"line": [4.5, 3.5]}],
+
+    [{"move": [7, 2.5]}, {"line": [7, 2.5]}, {"curve": [7.5, 2.5, 7.5, 3]},
+     {"curve": [7.5, 3.5, 7, 3.5]}, {"curve": [6.5, 3.5, 6.5, 3]}, 
+     {"curve": [6.5, 2.5, 7, 2.5]}],
+
+    [{"move": [12, 2.5]}, {"line": [12.5, 2.5]}, 
+    {"move": [11.5, 3]},{"curve": [11.5, 2.5, 12, 2.5]},
+    {"move": [11.5, 3]}, {"line": [11.5, 5.5]}],
+
+    [{"move": [14.5, 2.5]}, {"line": [16.5, 2.5]}],
+
+    [{"move": [14, 4.5]}, {"line": [14, 4.5]}, {"curve": [14.5, 4.5, 14.5, 5]},
+     {"curve": [14.5, 5.5, 14, 5.5]}, {"curve": [13.5, 5.5, 13.5, 5]}, 
+     {"curve": [13.5, 4.5, 14, 4.5]}],
+
+    [{"move": [6.5, 7.5]}, {"curve": [5.5, 7.5, 5.5, 8]}, 
+    {"move": [6.5, 7.5]}, {"line": [7.5, 7.5]},
+    {"move": [5.5, 8]}, {"line": [5.5, 11.5]}],
+
+    [{"move": [0, 11.5]}, {"line": [3, 11.5]}, {"curve": [3.5, 11.5, 3.5, 12]},
+     {"line": [3.5, 13]}, {"curve": [3.5, 13.5, 3, 13.5]}, {"line": [1, 13.5]},
+     {"curve": [0.5, 13.5, 0.5, 14]}, {"line": [0.5, 17]},
+     {"curve": [0.5, 17.5, 1, 17.5]}, {"line": [1.5, 17.5]}],
+    
+     [{"move": [1, 17.5]}, {"curve": [0.5, 17.5, 0.5, 18]}, {"line": [0.5, 21]},
+     {"curve": [0.5, 21.5, 1, 21.5]}, {"line": [18, 21.5]},
+     {"curve": [18.5, 21.5, 18.5, 21]}, {"line": [18.5, 18]},
+     {"curve": [18.5, 17.5, 18, 17.5]}, {"line": [17.5, 17.5]}],
+    
+     [{"move": [18, 17.5]}, {"curve": [18.5, 17.5, 18.5, 17]},
+     {"line": [18.5, 14]}, {"curve": [18.5, 13.5, 18, 13.5]},
+     {"line": [16, 13.5]}, {"curve": [15.5, 13.5, 15.5, 13]},
+     {"line": [15.5, 12]}, {"curve": [15.5, 11.5, 16, 11.5]},
+     {"line": [19, 11.5]}],
+
+    [{"move": [13.5, 11.5]}, {"line": [13.5, 13.5]}],
+
+    [{"move": [2.5, 15.5]}, {"line": [3.5, 15.5]}],
+
+    [{"move": [15.5, 15.5]}, {"line": [16.5, 15.5]}],
+
+    [{"move": [6, 15.5]},{"curve": [5.45, 15.5, 5.5, 14.5]},
+     {"line": [5.5, 14]}, {"curve": [5.5, 13.6, 6, 13.5]},
+     {"line": [7, 13.5]}, {"curve": [7.5, 13.5, 7.5, 14]},
+     {"line": [7.5, 15]}, {"curve": [7.5, 15.5, 7, 15.5]},
+     {"move": [6, 15.5]}, {"line": [7, 15.5]}],
+    
+    [{"move": [2.5, 19.5]}, {"line": [4, 19.5]},
+     {"curve": [4.5, 19.5, 4.5, 19]}, {"line": [4.5, 17.5]}],
+
+    [{"move": [6.5, 19]}, {"curve": [6.5, 19.5, 7, 19.5]},
+     {"line": [8.5, 19.5]}, {"move": [6.5, 19]}, {"line": [6.5, 17.5]} ],
+     
+     [{"move": [10.5, 19.5]}, {"line": [13, 19.5]},
+     {"curve": [13.5, 19.5, 13.5, 19]}, {"line": [13.5, 17.9]},
+     {"move": [14.5, 17.6]}, {"curve": [13.6, 17.5, 13.5, 17.9]},
+     {"move": [14.5, 17.6]}, {"line": [15.5, 17.6]}],
+     
+    [{"move": [15.5, 19.5]},{"line": [16.5, 19.5]}],
+
+    [{"move": [9.5, 14]}, {"line": [9.5, 15.5]}],
+    [{"move": [9.5, 13.9]}, {"curve": [9.5, 13.5, 10, 13.5]},
+     {"line": [11.5, 13.5]}],
+
+    [{"move": [8.5, 17.5]}, {"line": [11, 17.5]},
+    {"curve": [11.6, 17.5, 11.5, 16.5]}, {"line": [11.5, 16]},
+    {"curve": [11.5, 15.5, 12.5, 15.5]},
+    {"move": [12.5, 15.5]}, {"line": [13.5, 15.5]}],
+
+     //starting point - map center
+    [{"move": [8.5, 9.5]}, {"line": [8, 9.5]}, {"curve": [7.5, 9.5, 7.5, 10]},
+    {"line": [7.5, 11]}, {"curve": [7.5, 11.5, 8, 11.5]},
+    {"line": [8.5, 11.5]}, {"move": [11, 11.5]}, {"line": [10.5, 11.5]},
+    {"move": [11, 11.5]}, {"curve": [11.5, 11.5, 11.5, 11]},
+    {"line": [11.5, 10]}, {"curve": [11.5, 9.5, 11, 9.5]},
+    {"line": [8.5, 9.5]}]
+];
+
+Pacman.WALLS2 = [
+    
+    [{"move": [0, 9.5]}, {"line": [3, 9.5]},
+     {"curve": [3.5, 9.5, 3.5, 9]}, {"line": [3.5, 8]},
+     {"curve": [3.5, 7.5, 3, 7.5]}, {"line": [1, 7.5]},
+     {"curve": [0.5, 7.5, 0.5, 7]}, {"line": [0.5, 1]},
+     {"curve": [0.5, 0.5, 1, 0.5]}, {"line": [9, 0.5]},
+     {"curve": [9.5, 0.5, 9.5, 1]}, {"line": [9.5, 3.5]}],
+
+    [{"move": [9.5, 1]},
+     {"curve": [9.5, 0.5, 10, 0.5]}, {"line": [18, 0.5]},
+     {"curve": [18.5, 0.5, 18.5, 1]}, {"line": [18.5, 7]},
+     {"curve": [18.5, 7.5, 18, 7.5]}, {"line": [16, 7.5]},
+     {"curve": [15.5, 7.5, 15.5, 8]}, {"line": [15.5, 9]},
+     {"curve": [15.5, 9.5, 16, 9.5]}, {"line": [19, 9.5]}],
+
+    [{"move": [2.5, 2.5]}, {"line": [2.5, 5]},
+     {"move": [2.5, 5]}, {"curve": [2.5, 5.5, 3, 5.5]},
+     {"move": [3, 5.5]}, {"line": [4.5, 5.5]}],
+
+    [{"move": [16.5, 2.5]}, {"line": [16.5, 5]},
+     {"move": [16.5, 5]}, {"curve": [16.5, 5.5, 16, 5.5]},
+     {"move": [16, 5.5]}, {"line": [14.5, 5.5]}],
+
+    [{"move": [4.5, 2.5]}, {"line": [4.5, 3.5]}],
+
+    [{"move": [14.5, 2.5]}, {"line": [14.5, 3.5]}],
+
+    [{"move": [9.5, 5.5]}, {"line": [9.5, 7.5]}],
+
+    [{"move": [7, 2.5]}, {"line": [7, 2.5]}, {"curve": [7.5, 2.5, 7.5, 3]},
+    {"curve": [7.5, 3.5, 7, 3.5]}, {"curve": [6.5, 3.5, 6.5, 3]}, 
+    {"curve": [6.5, 2.5, 7, 2.5]}],
+
+    [{"move": [12, 2.5]}, {"line": [12, 2.5]}, {"curve": [12.5, 2.5, 12.5, 3]},
+    {"curve": [12.5, 3.5, 12, 3.5]}, {"curve": [11.5, 3.5, 11.5, 3]}, 
+    {"curve": [11.5, 2.5, 12, 2.5]}],
+
+    [{"move": [7, 5.5]},{"curve": [6.5, 5.5, 6.5, 6]}, 
+     {"move": [7, 5.5]},{"curve": [7.5, 5.5, 7.5, 6]},
+     {"line": [7.5, 7]}, {"curve": [7.5, 7.5, 7, 7.5]},
+     {"move": [6.5, 6]},{"line": [6.5, 7]}, 
+     {"curve": [6.5, 7.5, 7, 7.5]}],
+
+    [{"move": [12, 5.5]},{"curve": [11.5, 5.5, 11.5, 6]}, 
+     {"move": [12, 5.5]},{"curve": [12.5, 5.5, 12.5, 6]},
+     {"line": [12.5, 7]}, {"curve": [12.5, 7.5, 12, 7.5]},
+     {"move": [11.5, 6]},{"line": [11.5, 7]}, 
+     {"curve": [11.5, 7.5, 12, 7.5]}],
+
+    [{"move": [0, 11.5]}, {"line": [3, 11.5]}, {"curve": [3.5, 11.5, 3.5, 12]},
+     {"line": [3.5, 13]}, {"curve": [3.5, 13.5, 3, 13.5]}, {"line": [1, 13.5]},
+     {"curve": [0.5, 13.5, 0.5, 14]}, {"line": [0.5, 17]},
+     {"curve": [0.5, 17.5, 1, 17.5]}, {"line": [2.5, 17.5]}],
+    
+     [{"move": [1, 17.5]}, {"curve": [0.5, 17.5, 0.5, 18]}, {"line": [0.5, 21]},
+     {"curve": [0.5, 21.5, 1, 21.5]}, {"line": [18, 21.5]},
+     {"curve": [18.5, 21.5, 18.5, 21]}, {"line": [18.5, 18]},
+     {"curve": [18.5, 17.5, 18, 17.5]}, {"line": [16.5, 17.5]}],
+    
+     [{"move": [18, 17.5]}, {"curve": [18.5, 17.5, 18.5, 17]},
+     {"line": [18.5, 14]}, {"curve": [18.5, 13.5, 18, 13.5]},
+     {"line": [16, 13.5]}, {"curve": [15.5, 13.5, 15.5, 13]},
+     {"line": [15.5, 12]}, {"curve": [15.5, 11.5, 16, 11.5]},
+     {"line": [19, 11.5]}],
+    
+    [{"move": [5.5, 9.5]}, {"line": [5.5, 11.5]}],
+
+    [{"move": [13.5, 9.5]}, {"line": [13.5, 11.5]}],
+
+    [{"move": [2.5, 15.5]}, {"line": [3.5, 15.5]}],
+
+    [{"move": [15.5, 15.5]}, {"line": [16.5, 15.5]}],
+
+    [{"move": [6, 15.5]},{"curve": [5.45, 15.5, 5.5, 14.5]},
+     {"line": [5.5, 14]}, {"curve": [5.5, 13.6, 6, 13.5]},
+     {"line": [7, 13.5]}, {"curve": [7.5, 13.5, 7.5, 14]},
+     {"line": [7.5, 15]}, {"curve": [7.5, 15.5, 7, 15.5]},
+     {"move": [6, 15.5]}, {"line": [7, 15.5]}],
+
+    [{"move": [12, 15.5]},{"curve": [11.45, 15.5, 11.5, 14.5]},
+     {"line": [11.5, 14]}, {"curve": [11.5, 13.6, 12, 13.5]},
+     {"line": [13, 13.5]}, {"curve": [13.5, 13.5, 13.5, 14]},
+     {"line": [13.5, 15]}, {"curve": [13.5, 15.5, 13, 15.5]},
+     {"move": [12, 15.5]}, {"line": [13, 15.5]}],
+    
+    [{"move": [2.5, 19.5]}, {"line": [4, 19.5]},
+     {"curve": [4.5, 19.5, 4.5, 19]}, {"line": [4.5, 17.5]}],
+
+    [{"move": [6.5, 19]}, {"curve": [6.5, 19.5, 7, 19.5]},
+     {"line": [8.5, 19.5]}, {"move": [6.5, 19]}, {"line": [6.5, 17.5]} ],
+
+    [{"move": [10.5, 19.5]}, {"line": [12, 19.5]},
+     {"curve": [12.5, 19.5, 12.5, 19]}, {"line": [12.5, 17.5]}],
+
+    [{"move": [14.5, 19]}, {"curve": [14.5, 19.5, 15, 19.5]},
+     {"line": [16.5, 19.5]}, {"move": [14.5, 19]}, {"line": [14.5, 17.5]} ],
+
+    [{"move": [9.5, 13.5]}, {"line": [9.5, 15.5]}],
+
+    [{"move": [8.5, 17.5]}, {"line": [10.5, 17.5]}],
+
+     //starting point - map center
+    [{"move": [8.5, 9.5]}, {"line": [8, 9.5]}, {"curve": [7.5, 9.5, 7.5, 10]},
+     {"line": [7.5, 11]}, {"curve": [7.5, 11.5, 8, 11.5]},
+     {"line": [8.5, 11.5]}, {"move": [11, 11.5]}, {"line": [10.5, 11.5]},
+     {"move": [11, 11.5]}, {"curve": [11.5, 11.5, 11.5, 11]},
+     {"line": [11.5, 10]}, {"curve": [11.5, 9.5, 11, 9.5]},
+     {"line": [8.5, 9.5]}]
+];
+
+Pacman.WALLS3 = [
     [{"move": [0, 9.5]}, {"line": [3, 9.5]},
      {"curve": [3.5, 9.5, 3.5, 9]}, {"line": [3.5, 8]},
      {"curve": [3.5, 7.5, 3, 7.5]}, {"line": [1, 7.5]},
